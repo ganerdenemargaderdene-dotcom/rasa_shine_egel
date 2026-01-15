@@ -1,22 +1,652 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="mn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Физик Электроник хөтөлбөрийн Чат Бот</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NUM туслах</title>
+  <style>
+    :root{
+      /* --- Blue jeans inspired light palette --- */
+      --navy:#0A2A6B;        /* deep denim blue for accents */
+      --primary:#3B82F6;     /* primary blue */
+      --accent:#60A5FA;      /* lighter accent blue */
+      --surface:#FFFFFF;     /* white surfaces */
+      --text:#0F172A;        /* dark slate text for light backgrounds */
+      --muted:#475569;       /* secondary text on light */
+      --border:#E2E8F0;      /* light gray-blue borders */
+      --bubbleText:#0F172A;  /* text on white bubbles */
+
+      /* User bubble gradient (jeans wash) */
+      --userStart:#6EA8FF;   /* washed blue start */
+      --userEnd:#3B82F6;     /* classic jeans blue end */
+
+      /* Chip background on light */
+      --chipBg:#F1F5F9;      /* very light slate/blue */
+      --chipBorder:#D8E3F3;
+
+      --focus:#60A5FA;       /* focus ring */
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; height:100vh; overflow:hidden;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      /* Light base with deeper blue accents (blue jeans vibe) */
+      background:
+        radial-gradient(1200px 700px at 65% 15%, rgba(96,165,250,.25), transparent 60%), /* pale accent top-right */
+        radial-gradient(900px 600px at 15% 80%, rgba(59,130,246,.18), transparent 65%),  /* soft blue bottom-left */
+        radial-gradient(1400px 900px at 95% 95%, rgba(10,42,107,.22), transparent 62%),  /* deep blue corner wash */
+        linear-gradient(180deg, #FFFFFF 0%, #F5F9FF 100%);                               /* white → pale blue */
+      background-attachment: fixed;
+    }
+
+    .app{display:flex;height:100vh;width:100vw;}
+
+    /* Sidebar */
+    .sidebar{
+      width:300px; min-width:260px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border-right:1px solid var(--border);
+      padding:16px;
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .btn{
+      height:46px; border-radius:12px;
+      border:1px solid var(--border);
+      background:#FFFFFF;
+      color:var(--text);
+      cursor:pointer; display:flex; align-items:center; gap:10px;
+      padding:0 14px; font-weight:650;
+      transition: background .2s, border-color .2s, transform .05s;
+    }
+    .btn:hover{background:#F8FAFC}
+    .btn:active{transform: translateY(1px)}
+    .btn:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-color:transparent}
+
+    .chatList{display:flex; flex-direction:column; gap:10px; overflow:auto; padding-right:4px;}
+    .chatItem{
+      height:46px; border-radius:12px;
+      border:1px solid var(--border);
+      background:#FFFFFF;
+      padding:0 12px; display:flex; align-items:center;
+      cursor:pointer; user-select:none;
+      transition: background .2s, border-color .2s;
+    }
+    .chatItem:hover{background:#F8FAFC}
+    .chatItem.active{
+      background:#EFF6FF; /* light blue tint */
+      border-color:#BFDBFE;
+    }
+
+    /* Main */
+    .main{flex:1; display:flex; flex-direction:column; min-width:0;}
+    .topbar{
+      height:70px; display:flex; align-items:center; justify-content:space-between;
+      padding:0 24px; border-bottom:1px solid var(--border);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(8px);
+    }
+    .brand{display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.2px; color:var(--navy)}
+    .orb{
+      width:34px; height:34px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #D9E8FF 0%, var(--accent) 45%, #90B9FF 75%, #EAF2FF 100%);
+      box-shadow: 0 0 18px rgba(96,165,250,.35);
+      border:1px solid #D6E4FF;
+    }
+    .toplinks{display:flex; align-items:center; gap:14px; font-weight:650;}
+    .langToggle{
+      display:flex; gap:8px; align-items:center;
+      border:1px solid var(--border);
+      background:#FFFFFF;
+      border-radius:999px; padding:6px;
+    }
+    .langBtn{
+      border:none; cursor:pointer; background: transparent;
+      color: var(--text); font-weight:900; padding:8px 12px; border-radius:999px; opacity:.85;
+    }
+    .langBtn.active{background:#E0EAFF; opacity:1}
+    .langBtn:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+    .avatar{width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:#F1F5F9;}
+
+    .hero{text-align:center; padding:18px 16px 6px; border-bottom:1px solid var(--border);}
+    .hero h1{margin:6px 0 4px; font-size:34px; color:var(--navy)}
+    .hero p{margin:0 0 10px; color:var(--muted)}
+
+    .messages{
+      flex:1; overflow:auto; padding:18px 18px 160px;
+    }
+    .messages[aria-live]{outline: none;}
+    .row{display:flex; gap:10px; margin:14px 0;}
+    .row.bot{justify-content:flex-start;}
+    .row.user{justify-content:flex-end;}
+    .bubble{
+      max-width:min(720px, 78vw);
+      padding:14px 16px; border-radius:14px;
+      line-height:1.4; white-space:pre-wrap;
+      border:1px solid #EDF2F7;
+      box-shadow: 0 2px 10px rgba(15,23,42,.05);
+    }
+    .bot .bubble{background:var(--surface); color:var(--bubbleText);}
+    .user .bubble{
+      background: linear-gradient(135deg, var(--userStart), var(--userEnd));
+      color:#fff; border:1px solid rgba(255,255,255,.25); font-weight:650;
+    }
+    .botIcon{
+      width:34px; height:34px; border-radius:50%;
+      background:#F8FAFC;
+      border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center; flex:0 0 auto; margin-top:2px;
+    }
+
+    .chipsWrap{
+      position:fixed; left:300px; right:0; bottom:86px;
+      display:flex; justify-content:center; pointer-events:none;
+    }
+    .chips{
+      display:flex; gap:10px; flex-wrap:wrap;
+      background: rgba(255,255,255,.9);
+      border:1px solid var(--border);
+      padding:10px 12px; border-radius:16px;
+      backdrop-filter: blur(8px);
+      max-width: min(980px, 92vw);
+      pointer-events:auto;
+    }
+    .chip{
+      background: var(--chipBg);
+      color: var(--text);
+      border:1px solid var(--chipBorder);
+      padding:8px 12px; border-radius:999px;
+      cursor:pointer; font-weight:800; user-select:none;
+      transition:border-color .2s, background .2s, transform .05s;
+    }
+    .chip:hover{border-color: var(--accent)}
+    .chip:active{transform: translateY(1px)}
+    .chip:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+
+    .inputBar{
+      position:fixed; left:300px; right:0; bottom:0; height:80px;
+      border-top:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.95));
+      display:flex; align-items:center; gap:14px; padding:0 18px;
+    }
+    .input{
+      flex:1; height:46px; border-radius:12px; border:1px solid var(--border);
+      background:#FFFFFF;
+      color:var(--text); padding:10px 14px; outline:none;
+    }
+    .input::placeholder{color: rgba(71,85,105,.8)}
+    .input:focus-visible{outline:2px solid var(--focus); border-color:transparent}
+    .send{
+      min-width:130px; height:46px; border-radius:12px; border:none;
+      background: var(--primary);
+      color:#fff; font-weight:900; letter-spacing:.5px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      transition: filter .15s, transform .05s;
+    }
+    .send[disabled]{opacity:.8; cursor:not-allowed}
+    .send:hover{filter:brightness(1.06)}
+    .send:active{transform: translateY(1px)}
+    .send:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+
+    /* Spinner */
+    .spinner {
+      width:16px;height:16px;border-radius:50%;
+      border:2px solid rgba(255,255,255,.4);
+      border-top-color:#fff; animation: spin 1s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Scroll to bottom indicator */
+    .scrollHint{
+      position:fixed; right:22px; bottom:96px;
+      background: var(--primary); color:#fff; border:none; border-radius:999px;
+      padding:8px 12px; font-weight:700; cursor:pointer; display:none;
+      box-shadow: 0 6px 18px rgba(37,99,235,.25);
+    }
+    .scrollHint:focus-visible{outline:2px solid var(--focus)}
+
+    @media (max-width: 900px){
+      .sidebar{display:none}
+      .chipsWrap,.inputBar{left:0}
+    }
+  </style>
 </head>
 <body>
+  <div class="app">
+    <aside class="sidebar">
+      <button class="btn" id="newChatBtn" aria-label="Шинэ чат үүсгэх">＋ New Chat</button>
+      <div class="chatList" id="chatList"></div>
+    </aside>
 
-<div class="chat-container">
-  <div class="chat-header">Физик Электроник хөтөлбөрийн Чат Бот</div>
-  <div class="chat-messages" id="chatMessages"></div>
-  <div class="chat-input">
-    <input type="text" id="userInput" placeholder="энд дарж бичнэ үү..." />
-    <button id="sendBtn">Илгээх</button>
+    <main class="main">
+      <div class="topbar">
+        <div class="brand">
+          <div class="orb" aria-hidden="true"></div>
+          <div id="brandText">NUM туслах</div>
+        </div>
+        <div class="toplinks">
+          <div class="langToggle" role="group" aria-label="Хэл солих">
+            <button class="langBtn" id="mnBtn" aria-pressed="true">MN</button>
+            <button class="langBtn" id="enBtn" aria-pressed="false">EN</button>
+          </div>
+          <div class="avatar" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <h1 id="heroTitle">NUM туслах</h1>
+        <p id="heroSubtitle">Танд юугаар туслах вэ?</p>
+      </div>
+
+      <!-- aria-live for SR; we append nodes dynamically -->
+      <div class="messages" id="messages" aria-live="polite" aria-relevant="additions"></div>
+    </main>
   </div>
-</div>
 
-<script src="script.js"></script>
+  <div class="chipsWrap">
+    <div class="chips" id="chips" aria-label="Түргэн сонголтууд">
+      <!-- Chips will be rendered by JS based on language -->
+    </div>
+  </div>
+
+  <div class="inputBar">
+    <textarea class="input" id="msg" rows="1" placeholder="Асуултаа энд бичнэ үү…" aria-label="Мессеж бичих"></textarea>
+    <button class="send" id="sendBtn">
+      <span id="sendLabel">SEND</span>
+    </button>
+  </div>
+
+  <button class="scrollHint" id="scrollHint" title="Доош гүйлгэх">↓</button>
+
+<script>
+  /************** Config **************/
+  const RASA_URL = "http://localhost:5005/webhooks/rest/webhook";
+  const STORAGE_KEY = "num_ai_ui_state_v3";
+  const LANG_KEY = "muis_ai_lang"; // keep same key to preserve preference
+
+  // i18n copy
+  const I18N = {
+    mn: {
+      brand: "NUM туслах",
+      heroTitle: "NUM туслах",
+      heroSubtitle: "Танд юугаар туслах вэ?",
+      placeholder: "Асуултаа энд бичнэ үү…",
+      send: "ИЛГЭЭХ",
+      chips: [
+        { label: "сайн уу", text: "сайн уу" },
+        { label: "absent", text: "absent" },
+        { label: "W/I", text: "W/I" },
+      ],
+      errConnection: "⚠️ Холболтын алдаа. Rasa (5005) + Actions (5055) асаалттай эсэхийг шалгаарай.",
+      errNoReply: "Уучлаарай, одоогоор хариу олдсонгүй. 'тусламж' гэж бичээд үзээрэй.",
+      retry: "Дахин оролдох"
+    },
+    en: {
+      brand: "NUM Assistant",
+      heroTitle: "NUM Assistant",
+      heroSubtitle: "How can I help you today?",
+      placeholder: "Type your question here…",
+      send: "SEND",
+      chips: [
+        { label: "hello", text: "hello" },
+        { label: "help", text: "help" },
+        { label: "reset", text: "reset" },
+      ],
+      errConnection: "⚠️ Connection error. Check Rasa (5005) + Actions (5055).",
+      errNoReply: "Sorry, I couldn't find a reply. Try typing 'help'.",
+      retry: "Retry"
+    }
+  };
+
+  /************** State **************/
+  const state = loadState();
+
+  const chatListEl = document.getElementById("chatList");
+  const messagesEl = document.getElementById("messages");
+  const msgEl = document.getElementById("msg");
+  const sendBtn = document.getElementById("sendBtn");
+  const sendLabel = document.getElementById("sendLabel");
+  const newChatBtn = document.getElementById("newChatBtn");
+  const chipsEl = document.getElementById("chips");
+  const mnBtn = document.getElementById("mnBtn");
+  const enBtn = document.getElementById("enBtn");
+  const brandTextEl = document.getElementById("brandText");
+  const heroTitleEl = document.getElementById("heroTitle");
+  const heroSubtitleEl = document.getElementById("heroSubtitle");
+  const scrollHint = document.getElementById("scrollHint");
+
+  let sending = false;
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(parsed && parsed.chats && parsed.order && parsed.activeChatId){
+          return parsed;
+        }
+      }
+    }catch(e){}
+    const id = "chat_" + Date.now();
+    return {
+      activeChatId: id,
+      order: [id],
+      chats: {
+        [id]: {
+          id,
+          title: "New chat",
+          messages: [] // start empty (no greeting)
+        }
+      }
+    };
+  }
+  function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  /************** Utilities **************/
+  function getLang(){ return localStorage.getItem(LANG_KEY) || "mn"; }
+  function setLang(lang){
+    localStorage.setItem(LANG_KEY, lang);
+    renderLangButtons();
+    renderI18nTexts();
+    renderChips();
+    // silent language set to Rasa WITHOUT rendering replies
+    silentSend(lang === "en" ? "LANG_EN" : "LANG_MN");
+  }
+
+  function renderLangButtons(){
+    const lang = getLang();
+    mnBtn.classList.toggle("active", lang === "mn");
+    enBtn.classList.toggle("active", lang === "en");
+    mnBtn.setAttribute("aria-pressed", lang === "mn");
+    enBtn.setAttribute("aria-pressed", lang === "en");
+  }
+  function renderI18nTexts(){
+    const t = I18N[getLang()];
+    brandTextEl.textContent = t.brand;
+    heroTitleEl.textContent = t.heroTitle;
+    heroSubtitleEl.textContent = t.heroSubtitle;
+    msgEl.placeholder = t.placeholder;
+    sendLabel.textContent = t.send;
+  }
+  function renderChips(){
+    const t = I18N[getLang()];
+    chipsEl.innerHTML = "";
+    t.chips.forEach(c => {
+      const el = document.createElement("div");
+      el.className = "chip";
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("aria-label", c.label);
+      el.dataset.text = c.text;
+      el.textContent = c.label;
+      el.addEventListener("click", () => handleSend(c.text));
+      el.addEventListener("keydown", (e)=>{ if(e.key === "Enter" || e.key === " ") handleSend(c.text); });
+      chipsEl.appendChild(el);
+    });
+  }
+
+  function isNearBottom(){
+    const thresh = 120;
+    return messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < thresh;
+  }
+  function scrollToBottom(smooth=true){
+    messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+  }
+
+  function renderChatList(){
+    chatListEl.innerHTML = "";
+    for(const id of state.order){
+      const chat = state.chats[id];
+      const div = document.createElement("div");
+      div.className = "chatItem" + (id === state.activeChatId ? " active" : "");
+      div.textContent = chat.title || id;
+      div.onclick = () => switchChat(id);
+      chatListEl.appendChild(div);
+    }
+  }
+
+  function renderMessages(full=true){
+    const chat = state.chats[state.activeChatId];
+    if(full){
+      messagesEl.innerHTML = "";
+      for(const m of chat.messages){ appendMessageNode(m.role, m.text); }
+      scrollToBottom(false);
+    }else{
+      const m = chat.messages[chat.messages.length-1];
+      if(m) appendMessageNode(m.role, m.text);
+    }
+  }
+
+  function appendMessageNode(role, text){
+    const row = document.createElement("div");
+    row.className = "row " + (role === "user" ? "user" : "bot");
+
+    if(role === "bot"){
+      const icon = document.createElement("div");
+      icon.className = "botIcon";
+      icon.textContent = "🤖";
+      row.appendChild(icon);
+    }
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+    row.appendChild(bubble);
+
+    messagesEl.appendChild(row);
+    if(isNearBottom()) scrollToBottom(true);
+    toggleScrollHint();
+  }
+
+  function appendErrorWithRetry(message, onRetry){
+    const row = document.createElement("div");
+    row.className = "row bot";
+
+    const icon = document.createElement("div");
+    icon.className = "botIcon";
+    icon.textContent = "🤖";
+    row.appendChild(icon);
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.style.background = "var(--surface)";
+    bubble.style.color = "var(--bubbleText)";
+
+    const p = document.createElement("div");
+    p.textContent = message;
+    bubble.appendChild(p);
+
+    const btn = document.createElement("button");
+    btn.textContent = I18N[getLang()].retry;
+    btn.className = "btn";
+    btn.style.marginTop = "8px";
+    btn.addEventListener("click", onRetry);
+    bubble.appendChild(btn);
+
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+    if(isNearBottom()) scrollToBottom(true);
+    toggleScrollHint();
+  }
+
+  function addMessage(role, text){
+    const chat = state.chats[state.activeChatId];
+    chat.messages.push({ role, text });
+    if(role === "user" && (chat.title === "New chat" || !chat.title)){
+      chat.title = text.slice(0, 18);
+      renderChatList();
+    }
+    saveState();
+    renderMessages(false);
+  }
+
+  function switchChat(id){
+    if(!state.chats[id]) return;
+    state.activeChatId = id;
+    saveState();
+    renderChatList();
+    renderMessages(true);
+  }
+
+  function createNewChat(){
+    const id = "chat_" + Date.now();
+    state.chats[id] = {
+      id,
+      title: "New chat",
+      messages: [] // no greeting
+    };
+    state.order.unshift(id);
+    state.activeChatId = id;
+    saveState();
+    renderChatList();
+    renderMessages(true);
+
+    // optional: reset server-side, silently (no UI append)
+    silentSend("reset");
+    // apply current language silently
+    silentSend(getLang() === "en" ? "LANG_EN" : "LANG_MN");
+  }
+
+  // Fetch with timeout
+  async function fetchWithTimeout(url, options={}, timeout=12000){
+    const controller = new AbortController();
+    const id = setTimeout(()=>controller.abort(), timeout);
+    try{
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      return res;
+    } finally {
+      clearTimeout(id);
+    }
+  }
+
+  // Retry helper
+  async function withRetry(fn, retries=2, baseDelay=800){
+    let attempt = 0, lastErr;
+    while(attempt <= retries){
+      try{ return await fn(); }
+      catch(e){
+        lastErr = e;
+        if(attempt === retries) throw e;
+        const delay = baseDelay * Math.pow(2, attempt);
+        await new Promise(r => setTimeout(r, delay));
+        attempt++;
+      }
+    }
+    throw lastErr;
+  }
+
+  async function sendToRasa(userText){
+    const payload = { sender: state.activeChatId, message: userText };
+    const res = await withRetry(
+      () => fetchWithTimeout(RASA_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      }, 12000),
+      2, // retries
+      800 // base delay ms
+    );
+    if(!res.ok) throw new Error("Failed to fetch");
+    return await res.json();
+  }
+
+  // Silent send (NEVER appends replies)
+  async function silentSend(text){
+    try{
+      await sendToRasa(text);
+    }catch(e){
+      // silent
+    }
+  }
+
+  function setSending(on){
+    sending = on;
+    sendBtn.disabled = on;
+    if(on){
+      sendBtn.innerHTML = `<div class="spinner" aria-hidden="true"></div><span>${I18N[getLang()].send}</span>`;
+    }else{
+      sendBtn.innerHTML = `<span id="sendLabel">${I18N[getLang()].send}</span>`;
+    }
+  }
+
+  async function handleSend(text){
+    const lang = getLang();
+    const t = I18N[lang];
+
+    const raw = (typeof text === "string" ? text : msgEl.value) || "";
+    const trimmed = raw.trim();
+    if(!trimmed || sending) return;
+
+    msgEl.value = ""; // clear
+    addMessage("user", trimmed);
+
+    try{
+      setSending(true);
+      const replies = await sendToRasa(trimmed);
+      if(Array.isArray(replies) && replies.length){
+        let got = false;
+        for(const r of replies){
+          if(r && typeof r.text === "string" && r.text.trim().length){
+            addMessage("bot", r.text);
+            got = true;
+          }
+        }
+        if(!got){
+          addMessage("bot", t.errNoReply);
+        }
+      } else {
+        addMessage("bot", t.errNoReply);
+      }
+    }catch(err){
+      appendErrorWithRetry(I18N[getLang()].errConnection, () => handleSend(trimmed));
+    }finally{
+      setSending(false);
+    }
+  }
+
+  // Keyboard: Enter=send, Shift+Enter=newline
+  msgEl.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter"){
+      if(e.shiftKey){
+        return; // allow newline
+      }else{
+        e.preventDefault();
+        handleSend();
+      }
+    }
+  });
+
+  sendBtn.addEventListener("click", () => handleSend());
+  newChatBtn.addEventListener("click", createNewChat);
+  mnBtn.addEventListener("click", () => setLang("mn"));
+  enBtn.addEventListener("click", () => setLang("en"));
+
+  chipsEl.addEventListener("click", (e)=>{
+    const chip = e.target.closest(".chip");
+    if(!chip) return;
+    handleSend(chip.dataset.text);
+  });
+
+  // Scroll hint
+  function toggleScrollHint(){
+    if(isNearBottom()) { scrollHint.style.display = "none"; }
+    else { scrollHint.style.display = "block"; }
+  }
+  messagesEl.addEventListener("scroll", toggleScrollHint);
+  scrollHint.addEventListener("click", ()=> scrollToBottom(true));
+
+  // INIT
+  renderLangButtons();
+  renderI18nTexts();
+  renderChips();
+  renderChatList();
+  renderMessages(true);
+
+  // On first load, silently set language for NLU
+  silentSend(getLang() === "en" ? "LANG_EN" : "LANG_MN");
+</script>
 </body>
 </html>
