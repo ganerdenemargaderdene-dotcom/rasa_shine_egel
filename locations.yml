@@ -1,0 +1,139 @@
+places:
+  - key: num_main
+    title: МУИС, 1-р байр (Төв байр)
+    query: Монгол Улсын Их Сургууль 1-р байр Төв байр Улаанбаатар
+    url: https://maps.app.goo.gl/NbuuD8T7q94dprqE9
+    aliases:
+      - муис
+      - muis
+      - num
+      - монгол улсын их сургууль
+      - муис 1-р байр
+      - 1-р байр
+      - төв байр
+      - төв байр муис
+
+  - key: num_building_2
+    title: МУИС, 2-р байр (Нийгмийн шинжлэх ухааны сургууль)
+    query: МУИС Нийгмийн шинжлэх ухааны сургууль 2-р байр Улаанбаатар
+    url: https://maps.app.goo.gl/Cuq2TbqNAsmswzybA
+    aliases:
+      - муис 2-р байр
+      - 2-р байр
+      - нийгмийн шинжлэх ухааны сургууль
+      - ншус
+      - муис ншус
+
+  - key: num_building_3
+    title: МУИС, 3-р байр (Математик компьютерийн сургууль)
+    query: МУИС Математик компьютерийн сургууль 3-р байр Улаанбаатар
+    url: https://maps.app.goo.gl/TbtuE2j7JpdGiA4V9
+    aliases:
+      - муис 3-р байр
+      - 3-р байр
+      - математик компьютерийн сургууль
+      - мкс
+      - mkс
+      - муис мкс
+
+  - key: num_building_4
+    title: МУИС, 4-р байр (Бизнесийн сургууль)
+    query: МУИС Бизнесийн сургууль 4-р байр Улаанбаатар
+    url: https://maps.app.goo.gl/p2d9udYS3W5wvyEX6
+    aliases:
+      - муис 4-р байр
+      - 4-р байр
+      - бизнесийн сургууль
+      - бизнес сургууль
+      - муис бизнес
+
+  - key: num_building_5
+    title: МУИС, 5-р байр (Улс төр судлал, ОУХ, Нийтийн удирдлагын сургууль)
+    query: МУИС Улс төр судлал олон улсын харилцаа нийтийн удирдлагын сургууль 5-р байр Улаанбаатар
+    url: https://maps.app.goo.gl/U4xp4tnP7KsuRiLC7
+    aliases:
+      - муис 5-р байр
+      - 5-р байр
+      - улс төр судлал
+      - оух
+      - нийтийн удирдлага
+      - олон улсын харилцаа
+      - нудс
+
+  - key: num_digital_library
+    title: МУИС цахим номын сан
+    query: МУИС цахим номын сан Улаанбаатар
+    url: https://maps.app.goo.gl/tRLWXbeVPSt1dsLC6
+    aliases:
+      - цахим номын сан
+      - муис цахим номын сан
+      - e-library
+      - digital library
+
+  - key: num_dorm_1
+    title: МУИС-ийн оюутны 1-р дотуур байр
+    query: МУИС оюутны 1-р дотуур байр Улаанбаатар
+    url: https://maps.app.goo.gl/WEupr1W4cFsW1zeE8
+    aliases:
+      - 1-р дотуур байр
+      - дотуур байр 1
+      - dorm 1
+      - dormitory 1
+
+  - key: num_dorm_2
+    title: МУИС-ийн оюутны 2-р дотуур байр
+    query: МУИС оюутны 2-р дотуур байр Улаанбаатар
+    url: https://maps.app.goo.gl/jD9NC9RC5VzakBUm7
+    aliases:
+      - 2-р дотуур байр
+      - дотуур байр 2
+      - dorm 2
+      - dormitory 2
+
+  - key: num_dorm_3
+    title: МУИС-ийн оюутны 3-р дотуур байр
+    query: МУИС оюутны 3-р дотуур байр Улаанбаатар
+    url: https://maps.app.goo.gl/snX1d7cuH5tYHnD86
+    aliases:
+      - 3-р дотуур байр
+      - дотуур байр 3
+      - dorm 3
+      - dormitory 3
+
+  - key: num_dorm_5
+    title: МУИС-ийн оюутны 5-р дотуур байр
+    query: МУИС оюутны 5-р дотуур байр Улаанбаатар
+    url: https://maps.app.goo.gl/Dw2md481o2sC1zYa8
+    aliases:
+      - 5-р дотуур байр
+      - дотуур байр 5
+      - dorm 5
+      - dormitory 5
+
+  - key: num_dorm_6
+    title: МУИС-ийн оюутны 6-р дотуур байр
+    query: МУИС оюутны 6-р дотуур байр Улаанбаатар
+    url: https://maps.app.goo.gl/hrdhoCXDqVXJVxqDA
+    aliases:
+      - 6-р дотуур байр
+      - дотуур байр 6
+      - dorm 6
+      - dormitory 6
+
+  - key: num_foreign_student_housing
+    title: МУИС-ийн гадаад оюутны байр
+    query: МУИС гадаад оюутны байр Улаанбаатар
+    url: https://maps.app.goo.gl/QW8Kj8kXoWRMmaXN7
+    aliases:
+      - гадаад оюутны байр
+      - foreign student housing
+      - international dorm
+
+  - key: num_student_development_center
+    title: МУИС Багш, оюутны хөгжлийн төв
+    query: МУИС багш оюутны хөгжлийн төв Улаанбаатар
+    url: https://maps.app.goo.gl/itBcrb7nFauRnx4B8
+    aliases:
+      - хөгжлийн төв
+      - багш оюутны хөгжлийн төв
+      - student development center
